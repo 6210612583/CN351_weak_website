@@ -14,8 +14,8 @@ app.use(express.static('public'));
 const pool = mysql.createPool({
     host: 'localhost', // Replace with your MySQL server host
     user: 'root', // Replace with your MySQL username
-    password: 'password', // Replace with your MySQL password
-    database: 'databasename', // Replace with your MySQL database name
+    password: '!p0877249371', // Replace with your MySQL password
+    database: 'test1', // Replace with your MySQL database name
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
@@ -118,6 +118,10 @@ app.get('/user', (req, res) => {
                 <form action="/logout" method="post">
                 <button type="submit">Log Out</button>
                 </form>
+                <form action="/records" method="post">
+                <input type="text" name="id" placeholder="id" required><br>
+                <button type="submit">search</button>
+                </form>
                 `);
             }
         });
@@ -127,6 +131,17 @@ app.get('/user', (req, res) => {
     }
 
 })
+
+app.post("/records", (request, response) => {
+    const data = request.body;
+    console.log(data)
+    const query = `SELECT * FROM users WHERE idusers = ${data.id}`;
+    console.log("q", query)
+    pool.query(query, (err, rows) => {
+      if(err) throw err;
+      response.json({data:rows});
+    });
+  });
 
 app.post('/logout', (req, res) => {
     const sessionId = req.cookies.sessionId; // Retrieve the session ID from the cookie
