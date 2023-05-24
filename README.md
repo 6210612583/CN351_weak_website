@@ -18,6 +18,20 @@ USE studentID;
 CREATE TABLE users ( `idusers` INT NOT NULL AUTO_INCREMENT, `username` VARCHAR(45) NOT NULL, `password` VARCHAR(45) NOT NULL, PRIMARY KEY (`idusers`));
 CREATE TABLE sessions (`sessionId` VARCHAR(45) NOT NULL, `userId` INT NOT NULL, `username` VARCHAR(45) NOT NULL, `age` INT NOT NULL, PRIMARY KEY (`sessionId`));
 ```
+
+หลังจากสร้าง database แล้วให้นำ path ของ MySQL, ชื่อของ database และ password ลงใน file index.js
+```
+const pool = mysql.createPool({
+    host: 'localhost', // Replace with your MySQL server host
+    user: 'root', // Replace with your MySQL username
+    password: 'password', // Replace with your MySQL password
+    database: 'yourdatabase', // Replace with your MySQL database name
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+});
+```
+
 ## การแก้ไขจุดอ่อน
 - ทำการ random generate password แทนที่จะให้ user สร้างเองเพื่อป้องกันการ bruteforce
 - ทำการ random generate sessionId เพื่อให้ attacker นั้นยากที่จะคาดเดา
