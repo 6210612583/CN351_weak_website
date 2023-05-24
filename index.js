@@ -2,6 +2,7 @@ import express from "express";
 import mysql from "mysql2"
 import cookieParser from "cookie-parser"
 import bodyParser from "body-parser"
+import { randomBytes } from "crypto";
 
 const app = express()
 
@@ -23,7 +24,7 @@ const pool = mysql.createPool({
 
 // Home
 app.get("/", (req, res) => {
-  
+
     const sessionId = req.cookies.sessionId; // Retrieve the session ID from the cookie
 
     if (!sessionId) {
@@ -62,8 +63,8 @@ app.post('/login', (req, res) => {
                         console.error('Error retrieving max session ID from MySQL:', err);
                         return;
                     }
-                    const maxSessionId = results[0].maxSessionId || 0;
-                    const sessionId = maxSessionId + 1; // Increment the session ID
+                    //const maxSessionId = results[0].maxSessionId || 0;
+                    const sessionId = randomBytes(16).toString("base64");
                     const userId = query_results[0].idusers
                     const name = query_results[0].username
                     const userage = query_results[0].age
@@ -134,14 +135,22 @@ app.get('/user', (req, res) => {
 
 app.post("/records", (request, response) => {
     const data = request.body;
-    console.log(data)
-    const query = `SELECT * FROM users WHERE idusers = ${data.id}`;
-    console.log("q", query)
-    pool.query(query, (err, rows) => {
-      if(err) throw err;
-      response.json({data:rows});
-    });
-  });
+    console.log(data.id, typeof data.id)
+
+    if (isNaN(data.id)) {
+        console.log("bads")
+        response.redirect('/user')
+    } else {
+        console.log(data)
+        const query = `SELECT * FROM users WHERE idusers = ${data.id}`;
+        console.log("q", query)
+        pool.query(query, (err, rows) => {
+            if (err) throw err;
+            response.json({ data: rows });
+        });
+    }
+
+});
 
 app.post('/logout', (req, res) => {
     const sessionId = req.cookies.sessionId; // Retrieve the session ID from the cookie
@@ -163,9 +172,9 @@ app.post('/logout', (req, res) => {
 
 // Handle registration form submission
 app.post('/register', (req, res) => {
-    const { username, password, age } = req.body;
+    const { username, age } = req.body;
 
-    // Check if the username already exists
+    // Check if the username already exists 
     pool.query('SELECT * FROM users WHERE username = ?', [username], (err, results) => {
         if (err) {
             console.error('Error checking username in MySQL:', err);
@@ -182,15 +191,21 @@ app.post('/register', (req, res) => {
         } else {
             // Username is available, proceed with registration
 
+            const pass = randomBytes(16).toString("base64");
+            console.log("pass", pass)
             // Insert the new user into the users table
-            pool.query('INSERT INTO users (username, password, age) VALUES (?, ?, ?)', [username, password, age], (err) => {
+            pool.query('INSERT INTO users (username, password, age) VALUES (?, ?, ?)', [username, pass, age], (err) => {
                 if (err) {
                     console.error('Error registering user in MySQL:', err);
                     return;
                 }
 
                 // Redirect to the login page or any other page
-                res.redirect('/login');
+                res.send(`
+                    <h1> Register success</h1 >
+                    <p>your password is ${pass}</p>
+                    <button onclick="window.location.href='/'">Go to Homepage</button>
+                    `)            
             });
         }
     });
@@ -198,14 +213,14 @@ app.post('/register', (req, res) => {
 
 // Set up routes
 app.get('/register', (req, res) => {
-    res.send(`
+                                    res.send(`
       <h1>Register</h1>
       <form action="/register" method="post">
         <input type="text" name="username" placeholder="Username" required><br>
-        <input type="password" name="password" placeholder="Password" required><br>
         <input type="number" name="age" placeholder="Age" required><br>
         <button type="submit">Register</button>
       </form>
+      <button onclick="window.location.href='/'">Go to Homepage</button>
     `);
 });
 
@@ -213,17 +228,17 @@ app.get('/register', (req, res) => {
 
 
 app.get('/users', (req, res) => {
-    pool.query('SELECT * FROM users', (error, results) => {
-        if (error) {
-            console.error('Error executing query', error);
-            res.status(500).send('Error retrieving users');
-        } else {
-            res.json(results);
-        }
-    });
+                                    pool.query('SELECT * FROM users', (error, results) => {
+                                        if (error) {
+                                            console.error('Error executing query', error);
+                                            res.status(500).send('Error retrieving users');
+                                        } else {
+                                            res.json(results);
+                                        }
+                                    });
 });
 
 app.listen(8800, () => {
-    console.log("Connect to localhost:8800")
-})
+                                    console.log("Connect to localhost:8800")
+                                })
 
