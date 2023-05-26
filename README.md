@@ -15,7 +15,7 @@
 ```
 CREATE DATABSE studentID;
 USE studentID;
-CREATE TABLE users ( `idusers` INT NOT NULL AUTO_INCREMENT, `username` VARCHAR(45) NOT NULL, `password` VARCHAR(45) NOT NULL, PRIMARY KEY (`idusers`));
+CREATE TABLE users ( `idusers` INT NOT NULL AUTO_INCREMENT, `username` VARCHAR(45) NOT NULL, `password` VARCHAR(45) NOT NULL, `age` INT NOT NULL, PRIMARY KEY (`idusers`));
 CREATE TABLE sessions (`sessionId` VARCHAR(45) NOT NULL, `userId` INT NOT NULL, `username` VARCHAR(45) NOT NULL, `age` INT NOT NULL, PRIMARY KEY (`sessionId`));
 ```
 
